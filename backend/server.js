@@ -9,3 +9,9 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const voucherRoutes = require('./routes/vouchers');
 const bookingRoutes = require('./routes/bookings');
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/vouchers', voucherRoutes);
+app.use('/api/bookings', bookingRoutes);
