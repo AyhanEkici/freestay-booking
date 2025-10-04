@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfile": "backend/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "restartPolicy": "on-failure"
+  }
+}
