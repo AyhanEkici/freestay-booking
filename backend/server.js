@@ -47,6 +47,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/bookings', bookingRoutes);
 
+// Root route - welcome message
+app.get('/', (req, res) => {
+  res.send('Welcome to Freestay Booking Platform!');
+});
+
 // Health check
 app.get('/health', async (req, res) => {
   try {
