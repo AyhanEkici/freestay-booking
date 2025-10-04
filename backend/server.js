@@ -3,10 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 const { Pool } = require('pg');
 const redis = require('redis');
 
-// Initialize Express app FIRST
+// Initialize Express app
 const app = express();
 
 // Middleware
@@ -35,7 +36,7 @@ const redisClient = redis.createClient({
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 redisClient.connect();
 
-// Import routes AFTER app is defined
+// Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const voucherRoutes = require('./routes/vouchers');
@@ -47,10 +48,19 @@ app.use('/api/users', userRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// Root route - welcome message
-app.get('/', (req, res) => {
-  res.send('Welcome to Freestay Booking Platform!');
-});
+// Serve React build files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+} else {
+  // Serve React development server in development
+  app.get('/', (req, res) => {
+    res.send('Welcome to Freestay Booking Platform! Frontend will be served here in production.');
+  });
+}
 
 // Health check
 app.get('/health', async (req, res) => {
