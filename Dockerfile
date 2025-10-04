@@ -7,14 +7,18 @@ ENV NODE_ENV=production
 # Create app directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json from backend
 COPY backend/package*.json ./
 
-# Install dependencies
+# Install backend dependencies
 RUN npm install --only=production
 
 # Copy all backend files
 COPY backend/ .
+
+# Build frontend
+COPY frontend/ ./frontend/
+RUN cd frontend && npm install && npm run build
 
 # Expose port 5000
 EXPOSE 5000
