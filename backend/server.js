@@ -50,13 +50,15 @@ app.use('/api/bookings', bookingRoutes);
 
 // Serve React build files in production
 if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
   app.use(express.static(path.join(__dirname, '../frontend/build')));
   
+  // Handle React routing - serve index.html for all other routes
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 } else {
-  // Serve React development server in development
+  // In development mode, serve a simple message
   app.get('/', (req, res) => {
     res.send('Welcome to Freestay Booking Platform! Frontend will be served here in production.');
   });
