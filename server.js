@@ -48,18 +48,29 @@ app.use('/api/users', userRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// Serve React build files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'frontend/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
-  });
-} else {
-  app.get('/', (req, res) => {
-    res.send('Welcome to Freestay Booking Platform! Frontend will be served here in production.');
-  });
-}
+// Root route - serve a proper response
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Freestay Booking Platform</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .container { max-width: 800px; margin: 0 auto; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Freestay Booking Platform</h1>
+        <p>Your advanced hotel booking platform with voucher management is running!</p>
+        <p>API endpoints available at: <code>/api/...</code></p>
+        <p>Frontend will be served here in production mode.</p>
+      </div>
+    </body>
+    </html>
+  `);
+});
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -78,6 +89,17 @@ app.get('/health', async (req, res) => {
       error: error.message 
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// Handle 404 for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
 // Start server
