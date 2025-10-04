@@ -1,18 +1,15 @@
 {
-  "services": [
-    {
-      "name": "backend",
-      "directory": "backend",
-      "buildCommand": "npm install",
-      "startCommand": "npm start",
-      "port": 8080
-    },
-    {
-      "name": "frontend",
-      "directory": "frontend",
-      "buildCommand": "npm install && npm run build",
-      "startCommand": "npx serve -s build",
-      "port": 3000
+  "build": {
+    "builder": "nixpacks",
+    "nixpacksConfig": {
+      "phases": {
+        "setup": {
+          "nixPkgs": ["nodejs-16_x", "npm"]
+        },
+        "install": "cd backend && npm install",
+        "build": "cd backend && npm run build",
+        "start": "cd backend && npm start"
+      }
     }
-  ]
+  }
 }
