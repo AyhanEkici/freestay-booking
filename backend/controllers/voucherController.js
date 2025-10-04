@@ -80,6 +80,54 @@ class VoucherController {
     }
   }
 
+  async applyVoucher(req, res) {
+    try {
+      const { voucherCode, bookingData } = req.body;
+      const userId = req.user.id;
+
+      // Validate voucher
+      const result = await this.pool.query(`
+        SELECT * FROM vouchers 
+        WHERE code = $1 
+        AND purchased_by_user = $2
+        AND status = 'active'
+        AND validity_start <= CURRENT_TIMESTAMP
+        AND validity_end >= CURRENT_TIMESTAMP
+      `, [voucherCode.toUpperCase(), userId]);
+
+      if (result.rows.length === 0) {
+        return res.json({
+          success: false,
+          error: 'Invalid or unauthorized voucher'
+        });
+      }
+
+      const voucher = result.rows[0];
+
+      // Mark voucher as used
+      await this.pool.query(`
+        UPDATE vouchers 
+        SET current_uses = current_uses + 1,
+            status = CASE WHEN current_uses + 1 >= usage_limit THEN 'used' ELSE 'active' END
+        WHERE id = $1
+      `, [voucher.id]);
+
+      // Calculate discount
+      const commissionRemoved = bookingData.totalPrice * 0.15; // 15% commission removal
+      const finalPrice = bookingData.totalPrice - commissionRemoved;
+
+      res.json({
+        success: true,
+        originalPrice: bookingData.totalPrice,
+        finalPrice,
+        commissionRemoved,
+        voucherApplied: true
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   generateVoucherCode() {
     const prefix = 'VCH';
     const randomPart = uuidv4().replace(/-/g, '').substring(0, 8).toUpperCase();
